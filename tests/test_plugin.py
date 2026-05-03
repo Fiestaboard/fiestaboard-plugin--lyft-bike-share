@@ -1,4 +1,4 @@
-"""Unit tests for Bay Wheels GBFS integration."""
+"""Unit tests for Lyft Bike Share GBFS integration."""
 
 import pytest
 import json

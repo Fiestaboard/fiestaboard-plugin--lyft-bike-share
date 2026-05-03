@@ -1,4 +1,4 @@
-"""Plugin test fixtures and configuration for baywheels."""
+"""Plugin test fixtures and configuration for Lyft Bike Share."""
 
 import pytest
 from unittest.mock import patch, MagicMock

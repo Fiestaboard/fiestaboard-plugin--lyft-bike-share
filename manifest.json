@@ -1,8 +1,8 @@
 {
-  "id": "baywheels",
-  "name": "Bay Wheels",
-  "version": "1.1.0",
-  "description": "Display Bay Wheels bike share availability with electric and classic bike counts",
+  "id": "lyft_bikeshare",
+  "name": "Lyft Bike Share",
+  "version": "1.2.0",
+  "description": "Display Lyft bike share availability with electric and classic bike counts. Works with Bay Wheels, CitiBike, Capital Bikeshare, Biketown, Divvy, and other Lyft-operated systems.",
   "author": "FiestaBoard Team",
   "repository": "https://github.com/Fiestaboard/fiestaboard-plugin--baywheels",
   "documentation": "README.md",
@@ -14,17 +14,23 @@
     "properties": {
       "enabled": {
         "type": "boolean",
-        "title": "Enable Bay Wheels",
+        "title": "Enable Lyft Bike Share",
         "default": false
+      },
+      "gbfs_base_url": {
+        "type": "string",
+        "title": "GBFS Feed URL",
+        "description": "Base URL for your local Lyft bike share GBFS feed. Examples: https://gbfs.baywheels.com/gbfs/en (Bay Wheels), https://gbfs.citibikenyc.com/gbfs/en (CitiBike NYC), https://gbfs.capitalbikeshare.com/gbfs/en (Capital Bikeshare DC), https://gbfs.biketownpdx.com/gbfs/en (Biketown Portland), https://gbfs.divvybikes.com/gbfs/en (Divvy Chicago)",
+        "default": "https://gbfs.baywheels.com/gbfs/en"
       },
       "station_ids": {
         "type": "array",
         "title": "Station IDs",
-        "description": "Bay Wheels station IDs to monitor",
+        "description": "Lyft bike share station IDs to monitor",
         "items": {
           "type": "string"
         },
-        "ui:widget": "baywheels-station-picker"
+        "ui:widget": "lyft-bikeshare-station-picker"
       },
       "refresh_seconds": {
         "type": "integer",
@@ -34,18 +40,25 @@
       }
     },
     "required": [
+      "gbfs_base_url",
       "station_ids"
     ]
   },
   "env_vars": [
     {
-      "name": "BAYWHEELS_ENABLED",
+      "name": "LYFT_BIKESHARE_ENABLED",
       "required": false,
-      "description": "Enable Bay Wheels feature",
+      "description": "Enable Lyft Bike Share feature",
       "default": "false"
     },
     {
-      "name": "BAYWHEELS_STATION_IDS",
+      "name": "LYFT_BIKESHARE_GBFS_BASE_URL",
+      "required": false,
+      "description": "Base URL for your local Lyft bike share GBFS feed",
+      "default": "https://gbfs.baywheels.com/gbfs/en"
+    },
+    {
+      "name": "LYFT_BIKESHARE_STATION_IDS",
       "required": false,
       "description": "Comma-separated list of station IDs"
     }
@@ -97,6 +110,13 @@
         "max_length": 10,
         "group": "station",
         "example": "Market St"
+      },
+      "system_name": {
+        "description": "Name of the configured bike share system",
+        "type": "string",
+        "max_length": 10,
+        "group": "station",
+        "example": "Bay Wheels"
       },
       "status_color": {
         "description": "Color code for availability status",
@@ -203,21 +223,21 @@
   "screenshots": [
     {
       "src": "docs/board-display.png",
-      "alt": "Bay Wheels displayed on a Vestaboard",
-      "caption": "Display Bay Wheels bike share availability with electric and classic bike counts",
+      "alt": "Lyft Bike Share displayed on a Vestaboard",
+      "caption": "Display Lyft bike share availability with electric and classic bike counts",
       "primary": true
     }
   ],
   "demo": {
-    "name": "Bay Wheels Demo",
+    "name": "Lyft Bike Share Demo",
     "device_type": "flagship",
     "template": [
-      "Bay Wheels",
-      "{{baywheels.station_name}}",
-      "E-Bikes {{baywheels.electric_bikes}}",
-      "Classic {{baywheels.classic_bikes}}",
-      "Total {{baywheels.num_bikes_available}}",
-      "Stations {{baywheels.station_count}}"
+      "BIKE SHARE",
+      "{{lyft_bikeshare.station_name}}",
+      "E-Bikes {{lyft_bikeshare.electric_bikes}}",
+      "Classic {{lyft_bikeshare.classic_bikes}}",
+      "Total {{lyft_bikeshare.num_bikes_available}}",
+      "Stations {{lyft_bikeshare.station_count}}"
     ],
     "line_metadata": [
       {

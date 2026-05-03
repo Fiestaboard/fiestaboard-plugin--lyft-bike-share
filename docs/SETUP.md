@@ -1,6 +1,18 @@
-# Bay Wheels Setup Guide
+# Lyft Bike Share Setup Guide
 
-Bay Wheels integration allows you to track bike availability at multiple stations in the San Francisco Bay Area. The visual station finder makes it easy to find and monitor stations near your locations.
+The Lyft Bike Share plugin lets you track real-time bike availability at stations on any Lyft-operated bike share system. The visual station finder makes it easy to find and monitor stations near your locations.
+
+## Supported Systems
+
+This plugin works with all Lyft-operated bike share systems:
+
+| System | City / Region | GBFS Feed URL |
+|--------|---------------|---------------|
+| **Bay Wheels** | San Francisco Bay Area | `https://gbfs.baywheels.com/gbfs/en` |
+| **CitiBike** | New York City / Jersey City | `https://gbfs.citibikenyc.com/gbfs/en` |
+| **Capital Bikeshare** | Washington DC / Northern Virginia | `https://gbfs.capitalbikeshare.com/gbfs/en` |
+| **Biketown** | Portland, OR | `https://gbfs.biketownpdx.com/gbfs/en` |
+| **Divvy** | Chicago, IL | `https://gbfs.divvybikes.com/gbfs/en` |
 
 ## Overview
 
@@ -20,31 +32,53 @@ Bay Wheels integration allows you to track bike availability at multiple station
 ## Prerequisites
 
 - ✅ No API key required
-- ✅ Bay Wheels stations in your area
+- ✅ A Lyft bike share system in your area (see supported systems above)
 - ✅ Web UI access for station finder
 
 ## Quick Setup
 
-### 1. Enable Bay Wheels
+### 1. Enable Lyft Bike Share
 
 Via Web UI (Recommended):
 1. Go to the **Integrations** page
-2. Find **Bay Wheels** section
-3. Toggle the **Bay Wheels** plugin on
+2. Find **Lyft Bike Share** section
+3. Toggle the **Lyft Bike Share** plugin on
 4. Click **Save Changes**
 
 Via Environment Variables:
 ```bash
 # Add to .env
-BAYWHEELS_ENABLED=true
-BAYWHEELS_REFRESH_SECONDS=60  # Optional: refresh interval (default: 60)
+LYFT_BIKESHARE_ENABLED=true
+LYFT_BIKESHARE_GBFS_BASE_URL=https://gbfs.citibikenyc.com/gbfs/en  # Set to your system
+LYFT_BIKESHARE_REFRESH_SECONDS=60  # Optional: refresh interval (default: 60)
 ```
 
-### 2. Add Stations Using Station Finder
+### 2. Select Your Bike Share System
+
+Set the **GBFS Feed URL** to match the system in your city:
+
+```bash
+# Bay Wheels (San Francisco Bay Area)
+LYFT_BIKESHARE_GBFS_BASE_URL=https://gbfs.baywheels.com/gbfs/en
+
+# CitiBike (New York City)
+LYFT_BIKESHARE_GBFS_BASE_URL=https://gbfs.citibikenyc.com/gbfs/en
+
+# Capital Bikeshare (Washington DC)
+LYFT_BIKESHARE_GBFS_BASE_URL=https://gbfs.capitalbikeshare.com/gbfs/en
+
+# Biketown (Portland, OR)
+LYFT_BIKESHARE_GBFS_BASE_URL=https://gbfs.biketownpdx.com/gbfs/en
+
+# Divvy (Chicago, IL)
+LYFT_BIKESHARE_GBFS_BASE_URL=https://gbfs.divvybikes.com/gbfs/en
+```
+
+### 3. Add Stations Using Station Finder
 
 The web UI provides a visual station finder:
 
-1. Go to the **Bay Wheels** plugin on the **Integrations** page
+1. Go to the **Lyft Bike Share** plugin on the **Integrations** page
 2. Click **Find Stations** button
 3. Use one of three methods to find stations:
 
@@ -80,22 +114,22 @@ Longitude: -74.0060
 
 6. **Save** your configuration
 
-### 3. Create a Page to Display Bay Wheels Data
+### 4. Create a Page to Display Bike Share Data
 
 1. Go to **Pages** and click **New**
 2. Choose **Template** page type
-3. Add your template using Bay Wheels variables:
+3. Add your template using Lyft Bike Share variables:
 
 **Example Template:**
 ```
-{center}BAY WHEELS
-{baywheels.stations.0.station_name}
-E-Bikes: {baywheels.stations.0.electric_bikes}
-Classic: {baywheels.stations.0.classic_bikes}
+{center}BIKE SHARE
+{lyft_bikeshare.stations.0.station_name}
+E-Bikes: {lyft_bikeshare.stations.0.electric_bikes}
+Classic: {lyft_bikeshare.stations.0.classic_bikes}
 
-{baywheels.stations.1.station_name}
-E-Bikes: {baywheels.stations.1.electric_bikes}
-Classic: {baywheels.stations.1.classic_bikes}
+{lyft_bikeshare.stations.1.station_name}
+E-Bikes: {lyft_bikeshare.stations.1.electric_bikes}
+Classic: {lyft_bikeshare.stations.1.classic_bikes}
 ```
 
 4. **Save** and **Set as Active**
@@ -107,11 +141,11 @@ Classic: {baywheels.stations.1.classic_bikes}
 Access individual stations using index (0-3):
 
 ```
-{baywheels.stations.0.station_name}       # Station name (e.g., "19th St BART")
-{baywheels.stations.0.electric_bikes}    # Number of electric bikes available
-{baywheels.stations.0.classic_bikes}     # Number of classic bikes available
-{baywheels.stations.0.num_bikes_available} # Total bikes available
-{baywheels.stations.0.is_renting}        # "Yes" or "No"
+{lyft_bikeshare.stations.0.station_name}       # Station name (e.g., "19th St BART")
+{lyft_bikeshare.stations.0.electric_bikes}    # Number of electric bikes available
+{lyft_bikeshare.stations.0.classic_bikes}     # Number of classic bikes available
+{lyft_bikeshare.stations.0.num_bikes_available} # Total bikes available
+{lyft_bikeshare.stations.0.is_renting}        # "Yes" or "No"
 ```
 
 ### Aggregate Variables
@@ -119,58 +153,58 @@ Access individual stations using index (0-3):
 Total across all configured stations:
 
 ```
-{baywheels.total_electric}    # Total electric bikes across all stations
-{baywheels.total_classic}     # Total classic bikes across all stations
-{baywheels.total_bikes}       # Total bikes across all stations
+{lyft_bikeshare.total_electric}    # Total electric bikes across all stations
+{lyft_bikeshare.total_classic}     # Total classic bikes across all stations
+{lyft_bikeshare.total_bikes}       # Total bikes across all stations
 ```
 
 ### Station Count
 
 ```
-{baywheels.station_count}     # Number of configured stations
+{lyft_bikeshare.station_count}     # Number of configured stations
 ```
 
 ## Example Templates
 
-![Bay Wheels Display](./board-display.png)
+![Lyft Bike Share Display](./board-display.png)
 
 ### Simple Single Station
 
 ```
-{center}BAY WHEELS
+{center}BIKE SHARE
 19th & Telegraph
-E-Bikes: {baywheels.stations.0.electric_bikes}
-Classic: {baywheels.stations.0.classic_bikes}
+E-Bikes: {lyft_bikeshare.stations.0.electric_bikes}
+Classic: {lyft_bikeshare.stations.0.classic_bikes}
 ```
 
 ### Multiple Stations Compact
 
 ```
 {center}BIKE SHARE
-HOME: {baywheels.stations.0.electric_bikes}E {baywheels.stations.0.classic_bikes}C
-WORK: {baywheels.stations.1.electric_bikes}E {baywheels.stations.1.classic_bikes}C
-GYM:  {baywheels.stations.2.electric_bikes}E {baywheels.stations.2.classic_bikes}C
+HOME: {lyft_bikeshare.stations.0.electric_bikes}E {lyft_bikeshare.stations.0.classic_bikes}C
+WORK: {lyft_bikeshare.stations.1.electric_bikes}E {lyft_bikeshare.stations.1.classic_bikes}C
+GYM:  {lyft_bikeshare.stations.2.electric_bikes}E {lyft_bikeshare.stations.2.classic_bikes}C
 ```
 
 ### Aggregate Summary
 
 ```
-{center}BAY WHEELS TOTAL
-{baywheels.station_count} Stations Monitored
-E-Bikes: {baywheels.total_electric}
-Classic: {baywheels.total_classic}
-Bikes: {baywheels.total_bikes}
+{center}BIKE SHARE TOTAL
+{lyft_bikeshare.station_count} Stations Monitored
+E-Bikes: {lyft_bikeshare.total_electric}
+Classic: {lyft_bikeshare.total_classic}
+Bikes: {lyft_bikeshare.total_bikes}
 ```
 
 ### With Station Names
 
 ```
 {center}BIKE AVAILABILITY
-{baywheels.stations.0.station_name}
-E:{baywheels.stations.0.electric_bikes} C:{baywheels.stations.0.classic_bikes}
+{lyft_bikeshare.stations.0.station_name}
+E:{lyft_bikeshare.stations.0.electric_bikes} C:{lyft_bikeshare.stations.0.classic_bikes}
 
-{baywheels.stations.1.station_name}
-E:{baywheels.stations.1.electric_bikes} C:{baywheels.stations.1.classic_bikes}
+{lyft_bikeshare.stations.1.station_name}
+E:{lyft_bikeshare.stations.1.electric_bikes} C:{lyft_bikeshare.stations.1.classic_bikes}
 ```
 
 ## Configuration Reference
@@ -178,11 +212,14 @@ E:{baywheels.stations.1.electric_bikes} C:{baywheels.stations.1.classic_bikes}
 ### Environment Variables
 
 ```bash
-# Enable Bay Wheels
-BAYWHEELS_ENABLED=true
+# Enable Lyft Bike Share
+LYFT_BIKESHARE_ENABLED=true
+
+# GBFS feed URL for your local system
+LYFT_BIKESHARE_GBFS_BASE_URL=https://gbfs.baywheels.com/gbfs/en
 
 # Refresh interval (seconds)
-BAYWHEELS_REFRESH_SECONDS=60  # Default: 60 (1 minute)
+LYFT_BIKESHARE_REFRESH_SECONDS=60  # Default: 60 (1 minute)
 ```
 
 ### config.json Format
@@ -190,20 +227,14 @@ BAYWHEELS_REFRESH_SECONDS=60  # Default: 60 (1 minute)
 ```json
 {
   "features": {
-    "baywheels": {
+    "lyft_bikeshare": {
       "enabled": true,
+      "gbfs_base_url": "https://gbfs.citibikenyc.com/gbfs/en",
       "refresh_seconds": 60,
       "station_ids": [
-        "19th-st-bart",
-        "market-9th-st",
-        "embarcadero-plaza",
-        "ferry-building"
-      ],
-      "station_names": [
-        "19TH",
-        "MKT",
-        "EMB",
-        "FERRY"
+        "6926.07",
+        "5430.08",
+        "6140.02"
       ]
     }
   }
@@ -231,13 +262,6 @@ When configuring manually, use short names that fit on the display:
 - ✅ "19TH", "WORK", "GYM", "HOME"
 - ❌ "19th Street BART Station" (too long)
 
-### Checking Availability Trends
-
-Bay Wheels data shows current availability. For best results:
-- Check 5-10 minutes before leaving
-- Have backup stations identified
-- Consider time of day patterns (morning/evening commute)
-
 ## Troubleshooting
 
 ### No Stations Showing in Finder
@@ -245,9 +269,9 @@ Bay Wheels data shows current availability. For best results:
 **Problem:** Station finder returns no results
 
 **Solutions:**
-1. **Increase search radius**: Try 3-5km instead of 2km
-2. **Check location**: Ensure you're in Bay Area (SF, Oakland, San Jose, Berkeley)
-3. **Verify GBFS feed**: Test https://gbfs.baywheels.com/gbfs/en/station_information.json
+1. **Verify GBFS Feed URL**: Confirm the URL matches your local system (see supported systems table above)
+2. **Increase search radius**: Try 3-5km instead of 2km
+3. **Verify feed directly**: Open your system's `station_information.json` URL in a browser
 
 ### Station Shows Zero Bikes
 
@@ -263,12 +287,12 @@ Bay Wheels data shows current availability. For best results:
 **Problem:** Bike counts seem stale
 
 **Solutions:**
-1. **Check refresh interval**: Verify BAYWHEELS_REFRESH_SECONDS is set
+1. **Check refresh interval**: Verify `LYFT_BIKESHARE_REFRESH_SECONDS` is set
 2. **Check logs**: Look for GBFS API errors
 3. **Restart service**: Docker containers might need restart
-4. **Test GBFS directly**: 
+4. **Test GBFS directly**:
    ```bash
-   curl https://gbfs.baywheels.com/gbfs/en/station_status.json
+   curl https://gbfs.citibikenyc.com/gbfs/en/station_status.json
    ```
 
 ### Station Names Too Long
@@ -276,38 +300,25 @@ Bay Wheels data shows current availability. For best results:
 **Problem:** Station names overflow on display
 
 **Solutions:**
-1. **Use truncate filter**: `{baywheels.stations.0.station_name|truncate:22}`
-2. **Configure custom names**: Set short names in config.json
-3. **Use abbreviations**: "BART" instead of "BART Station"
+1. **Use truncate filter**: `{lyft_bikeshare.stations.0.station_name|truncate:22}`
+2. **Use abbreviations**: "BART" instead of "BART Station"
 
 ## Data Source
 
-Bay Wheels uses the **GBFS (General Bikeshare Feed Specification)** standard:
+All Lyft bike share systems use the **GBFS (General Bikeshare Feed Specification)** standard:
 
-- **Station Info**: https://gbfs.baywheels.com/gbfs/en/station_information.json
-- **Station Status**: https://gbfs.baywheels.com/gbfs/en/station_status.json
+- **Station Info**: `{gbfs_base_url}/station_information.json`
+- **Station Status**: `{gbfs_base_url}/station_status.json`
 - **Update Frequency**: Real-time (updates every 10-30 seconds at source)
-- **Coverage**: San Francisco, Oakland, Berkeley, San Jose, Emeryville
 
 ## Advanced Usage
-
-### Conditional Display Based on Availability
-
-```python
-# In template (when template language supports conditionals)
-{% if baywheels.stations.0.electric_bikes > 2 %}
-  Plenty of e-bikes available!
-{% else %}
-  Limited e-bikes, consider classic
-{% endif %}
-```
 
 ### Combining with Other Features
 
 ```
 {center}MORNING COMMUTE
 Muni: {muni.stops.0.formatted}
-Bikes: {baywheels.stations.0.electric_bikes}E
+Bikes: {lyft_bikeshare.stations.0.electric_bikes}E
 Traffic: {traffic.routes.0.duration_minutes}m
 ```
 
@@ -315,9 +326,9 @@ Traffic: {traffic.routes.0.duration_minutes}m
 
 ```
 {center}WHICH STATION?
-19th: {baywheels.stations.0.electric_bikes}E {baywheels.stations.0.classic_bikes}C
-Mkt:  {baywheels.stations.1.electric_bikes}E {baywheels.stations.1.classic_bikes}C
-Emb:  {baywheels.stations.2.electric_bikes}E {baywheels.stations.2.classic_bikes}C
+Near: {lyft_bikeshare.stations.0.electric_bikes}E {lyft_bikeshare.stations.0.classic_bikes}C
+Alt:  {lyft_bikeshare.stations.1.electric_bikes}E {lyft_bikeshare.stations.1.classic_bikes}C
+Best: {lyft_bikeshare.stations.2.electric_bikes}E {lyft_bikeshare.stations.2.classic_bikes}C
 ```
 
 ## API Reference
@@ -325,34 +336,36 @@ Emb:  {baywheels.stations.2.electric_bikes}E {baywheels.stations.2.classic_bikes
 ### REST API Endpoints
 
 ```bash
-# List all Bay Wheels stations
-GET /baywheels/stations
+# List all stations for configured system
+GET /lyft_bikeshare/stations
 
 # Find stations near location
-GET /baywheels/stations/nearby?lat=40.7128&lng=-74.0060&radius=2.0
+GET /lyft_bikeshare/stations/nearby?lat=40.7128&lng=-74.0060&radius=2.0
 
 # Search stations by address
-GET /baywheels/stations/search?address=123+Market+St&radius=2.0
+GET /lyft_bikeshare/stations/search?address=123+Market+St&radius=2.0
 ```
 
 ## Related Features
 
-- **Muni Transit**: Track transit arrivals alongside bike availability
+- **Transit**: Track transit arrivals alongside bike availability
 - **Traffic**: Compare bike vs. drive times
 - **Weather**: Check weather before biking
 
 ## Resources
 
-- [Bay Wheels Website](https://www.baywheels.com/)
-- [Bay Wheels System Map](https://www.baywheels.com/system-data)
 - [GBFS Specification](https://github.com/MobilityData/gbfs)
-- [Real-time Station Map](https://www.baywheels.com/map)
+- [Bay Wheels](https://www.baywheels.com/)
+- [CitiBike](https://citibikenyc.com/)
+- [Capital Bikeshare](https://www.capitalbikeshare.com/)
+- [Biketown](https://www.biketownpdx.com/)
+- [Divvy](https://divvybikes.com/)
 
 ---
 
 **Next Steps:**
-1. Enable Bay Wheels in Settings
-2. Use station finder to add your favorite stations
-3. Create a page with bike availability
-4. Set as active page or combine with other transit data
-
+1. Enable Lyft Bike Share in Settings
+2. Set the GBFS Feed URL for your city's system
+3. Use station finder to add your favorite stations
+4. Create a page with bike availability
+5. Set as active page or combine with other transit data
