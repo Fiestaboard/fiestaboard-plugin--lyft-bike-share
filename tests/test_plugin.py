@@ -887,25 +887,27 @@ class TestBayWheelsPluginClass:
     def test_get_station_information_cached(self, plugin):
         """Test _get_station_information returns cached data."""
         import plugins.lyft_bikeshare as ls_module
-        ls_module._station_info_cache = {"123": {"name": "Cached"}}
-        ls_module._station_info_cache_time = time.time()
+        base_url = "https://gbfs.baywheels.com/gbfs/en"
+        ls_module._station_info_cache = {base_url: {"123": {"name": "Cached"}}}
+        ls_module._station_info_cache_time = {base_url: time.time()}
         result = plugin._get_station_information()
         assert result is not None
         assert "123" in result
         assert result["123"]["name"] == "Cached"
-        ls_module._station_info_cache = None
-        ls_module._station_info_cache_time = 0
+        ls_module._station_info_cache = {}
+        ls_module._station_info_cache_time = {}
 
     def test_get_station_information_api_error(self, plugin):
         """Test _get_station_information with API error returns cached data."""
         import plugins.lyft_bikeshare as ls_module
-        ls_module._station_info_cache = {"123": {"name": "Cached"}}
-        ls_module._station_info_cache_time = 0
+        base_url = "https://gbfs.baywheels.com/gbfs/en"
+        ls_module._station_info_cache = {base_url: {"123": {"name": "Cached"}}}
+        ls_module._station_info_cache_time = {base_url: 0}
         with patch('plugins.lyft_bikeshare.requests.get', side_effect=Exception("API error")):
             result = plugin._get_station_information()
-            assert result == ls_module._station_info_cache
-        ls_module._station_info_cache = None
-        ls_module._station_info_cache_time = 0
+            assert result == ls_module._station_info_cache.get(base_url)
+        ls_module._station_info_cache = {}
+        ls_module._station_info_cache_time = {}
 
     def test_get_formatted_display_with_cache(self, plugin):
         """Test get_formatted_display with cached data."""
