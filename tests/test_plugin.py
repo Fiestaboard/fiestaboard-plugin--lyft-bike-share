@@ -1,4 +1,4 @@
-"""Unit tests for Bay Wheels GBFS integration."""
+"""Unit tests for Lyft Bike Share GBFS integration."""
 
 import pytest
 import json
@@ -734,16 +734,16 @@ class TestBayWheelsConfig:
 
 
 class TestBayWheelsPluginClass:
-    """Tests for BayWheelsPlugin class (plugins/baywheels/__init__.py)."""
+    """Tests for LyftBikeSharePlugin class (plugins/lyft_bikeshare/__init__.py)."""
 
     @pytest.fixture
     def plugin(self):
-        from plugins.baywheels import BayWheelsPlugin
-        manifest = {"id": "baywheels", "name": "Bay Wheels", "version": "1.0.0"}
-        return BayWheelsPlugin(manifest)
+        from plugins.lyft_bikeshare import LyftBikeSharePlugin
+        manifest = {"id": "lyft_bikeshare", "name": "Lyft Bike Share", "version": "2.0.0"}
+        return LyftBikeSharePlugin(manifest)
 
     def test_plugin_id(self, plugin):
-        assert plugin.plugin_id == "baywheels"
+        assert plugin.plugin_id == "lyft_bikeshare"
 
     def test_validate_config_valid(self, plugin):
         assert plugin.validate_config({"station_ids": ["s1"]}) == []
@@ -788,7 +788,7 @@ class TestBayWheelsPluginClass:
         }
         mock_resp.raise_for_status.return_value = None
         station_info = {"station-1": {"name": "Test Station", "lat": 37.77, "lon": -122.42}}
-        with patch('plugins.baywheels.requests.get', return_value=mock_resp), \
+        with patch('plugins.lyft_bikeshare.requests.get', return_value=mock_resp), \
              patch.object(plugin, '_get_station_information', return_value=station_info):
             result = plugin.fetch_data()
             assert result.available
@@ -810,14 +810,14 @@ class TestBayWheelsPluginClass:
             }
         }
         mock_resp.raise_for_status.return_value = None
-        with patch('plugins.baywheels.requests.get', return_value=mock_resp), \
+        with patch('plugins.lyft_bikeshare.requests.get', return_value=mock_resp), \
              patch.object(plugin, '_get_station_information', return_value={}):
             result = plugin.fetch_data()
             assert not result.available
 
     def test_fetch_data_exception(self, plugin):
         plugin._config = {"station_ids": ["s1"]}
-        with patch('plugins.baywheels.requests.get', side_effect=Exception("fail")):
+        with patch('plugins.lyft_bikeshare.requests.get', side_effect=Exception("fail")):
             result = plugin.fetch_data()
             assert not result.available
 
@@ -836,7 +836,7 @@ class TestBayWheelsPluginClass:
         }
         mock_resp.raise_for_status.return_value = None
         station_info = {"station-1": {"name": "A Very Long Station Name Here", "lat": 37.77, "lon": -122.42}}
-        with patch('plugins.baywheels.requests.get', return_value=mock_resp), \
+        with patch('plugins.lyft_bikeshare.requests.get', return_value=mock_resp), \
              patch.object(plugin, '_get_station_information', return_value=station_info):
             result = plugin.fetch_data()
             assert result.available
@@ -856,7 +856,7 @@ class TestBayWheelsPluginClass:
             }
         }
         mock_resp.raise_for_status.return_value = None
-        with patch('plugins.baywheels.requests.get', return_value=mock_resp), \
+        with patch('plugins.lyft_bikeshare.requests.get', return_value=mock_resp), \
              patch.object(plugin, '_get_station_information', return_value={}):
             result = plugin.fetch_data()
             assert result.available
@@ -877,8 +877,8 @@ class TestBayWheelsPluginClass:
                 ]
             }
         }
-        with patch('plugins.baywheels.requests.get', return_value=mock_resp), \
-             patch('plugins.baywheels.time.time', return_value=1000):
+        with patch('plugins.lyft_bikeshare.requests.get', return_value=mock_resp), \
+             patch('plugins.lyft_bikeshare.time.time', return_value=1000):
             result = plugin._get_station_information()
             assert result is not None
             assert "123" in result
@@ -886,26 +886,28 @@ class TestBayWheelsPluginClass:
 
     def test_get_station_information_cached(self, plugin):
         """Test _get_station_information returns cached data."""
-        import plugins.baywheels as bw_module
-        bw_module._station_info_cache = {"123": {"name": "Cached"}}
-        bw_module._station_info_cache_time = time.time()
+        import plugins.lyft_bikeshare as ls_module
+        base_url = "https://gbfs.baywheels.com/gbfs/en"
+        ls_module._station_info_cache = {base_url: {"123": {"name": "Cached"}}}
+        ls_module._station_info_cache_time = {base_url: time.time()}
         result = plugin._get_station_information()
         assert result is not None
         assert "123" in result
         assert result["123"]["name"] == "Cached"
-        bw_module._station_info_cache = None
-        bw_module._station_info_cache_time = 0
+        ls_module._station_info_cache = {}
+        ls_module._station_info_cache_time = {}
 
     def test_get_station_information_api_error(self, plugin):
         """Test _get_station_information with API error returns cached data."""
-        import plugins.baywheels as bw_module
-        bw_module._station_info_cache = {"123": {"name": "Cached"}}
-        bw_module._station_info_cache_time = 0
-        with patch('plugins.baywheels.requests.get', side_effect=Exception("API error")):
+        import plugins.lyft_bikeshare as ls_module
+        base_url = "https://gbfs.baywheels.com/gbfs/en"
+        ls_module._station_info_cache = {base_url: {"123": {"name": "Cached"}}}
+        ls_module._station_info_cache_time = {base_url: 0}
+        with patch('plugins.lyft_bikeshare.requests.get', side_effect=Exception("API error")):
             result = plugin._get_station_information()
-            assert result == bw_module._station_info_cache
-        bw_module._station_info_cache = None
-        bw_module._station_info_cache_time = 0
+            assert result == ls_module._station_info_cache.get(base_url)
+        ls_module._station_info_cache = {}
+        ls_module._station_info_cache_time = {}
 
     def test_get_formatted_display_with_cache(self, plugin):
         """Test get_formatted_display with cached data."""
@@ -926,7 +928,7 @@ class TestBayWheelsPluginClass:
         lines = plugin.get_formatted_display()
         assert lines is not None
         assert len(lines) == 6
-        assert "BAY WHEELS" in lines[0]
+        assert "BIKE SHARE" in lines[0]
         assert "Station 1" in lines[2]
         assert "5E" in lines[2]
         assert "3C" in lines[2]
