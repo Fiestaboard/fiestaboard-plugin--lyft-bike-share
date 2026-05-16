@@ -34,40 +34,40 @@ The Lyft Bike Share plugin fetches real-time bike availability from any Lyft-ope
 ### Primary Station (First)
 
 ```
-{{lyft_bikeshare.electric_bikes}}      # Electric bikes available
-{{lyft_bikeshare.classic_bikes}}       # Classic bikes available
-{{lyft_bikeshare.num_bikes_available}} # Total bikes
-{{lyft_bikeshare.station_name}}        # Station name
-{{lyft_bikeshare.is_renting}}          # "Yes" or "No"
-{{lyft_bikeshare.status_color}}        # Color tile
+{{lyft_bike_share.electric_bikes}}      # Electric bikes available
+{{lyft_bike_share.classic_bikes}}       # Classic bikes available
+{{lyft_bike_share.num_bikes_available}} # Total bikes
+{{lyft_bike_share.station_name}}        # Station name
+{{lyft_bike_share.is_renting}}          # "Yes" or "No"
+{{lyft_bike_share.status_color}}        # Color tile
 ```
 
 ### Aggregate Stats
 
 ```
-{{lyft_bikeshare.total_electric}}      # Total e-bikes across all stations
-{{lyft_bikeshare.total_classic}}       # Total classic bikes
-{{lyft_bikeshare.total_bikes}}         # Total all bikes
-{{lyft_bikeshare.station_count}}       # Number of tracked stations
+{{lyft_bike_share.total_electric}}      # Total e-bikes across all stations
+{{lyft_bike_share.total_classic}}       # Total classic bikes
+{{lyft_bike_share.total_bikes}}         # Total all bikes
+{{lyft_bike_share.station_count}}       # Number of tracked stations
 ```
 
 ### Best Station
 
 ```
-{{lyft_bikeshare.best_station_name}}     # Name of station with most e-bikes
-{{lyft_bikeshare.best_station_electric}} # E-bike count at best station
+{{lyft_bike_share.best_station_name}}     # Name of station with most e-bikes
+{{lyft_bike_share.best_station_electric}} # E-bike count at best station
 ```
 
 ### Individual Stations (Array)
 
 ```
-{{lyft_bikeshare.stations.0.station_name}}    # First station name
-{{lyft_bikeshare.stations.0.electric_bikes}}  # First station e-bikes
-{{lyft_bikeshare.stations.0.classic_bikes}}   # First station classic
-{{lyft_bikeshare.stations.0.status_color}}    # First station color
+{{lyft_bike_share.stations.0.station_name}}    # First station name
+{{lyft_bike_share.stations.0.electric_bikes}}  # First station e-bikes
+{{lyft_bike_share.stations.0.classic_bikes}}   # First station classic
+{{lyft_bike_share.stations.0.status_color}}    # First station color
 
-{{lyft_bikeshare.stations.1.station_name}}    # Second station name
-{{lyft_bikeshare.stations.1.electric_bikes}}  # Second station e-bikes
+{{lyft_bike_share.stations.1.station_name}}    # Second station name
+{{lyft_bike_share.stations.1.electric_bikes}}  # Second station e-bikes
 ```
 
 ## Example Templates
@@ -76,27 +76,27 @@ The Lyft Bike Share plugin fetches real-time bike availability from any Lyft-ope
 
 ```
 {center}BIKE SHARE
-{{lyft_bikeshare.station_name}}
-Electric: {{lyft_bikeshare.electric_bikes}}
-Classic: {{lyft_bikeshare.classic_bikes}}
+{{lyft_bike_share.station_name}}
+Electric: {{lyft_bike_share.electric_bikes}}
+Classic: {{lyft_bike_share.classic_bikes}}
 ```
 
 ### Multiple Stations
 
 ```
 {center}BIKES NEARBY
-{{lyft_bikeshare.stations.0.station_name}}: {{lyft_bikeshare.stations.0.electric_bikes}}E
-{{lyft_bikeshare.stations.1.station_name}}: {{lyft_bikeshare.stations.1.electric_bikes}}E
-{{lyft_bikeshare.stations.2.station_name}}: {{lyft_bikeshare.stations.2.electric_bikes}}E
-TOTAL: {{lyft_bikeshare.total_electric}}E
+{{lyft_bike_share.stations.0.station_name}}: {{lyft_bike_share.stations.0.electric_bikes}}E
+{{lyft_bike_share.stations.1.station_name}}: {{lyft_bike_share.stations.1.electric_bikes}}E
+{{lyft_bike_share.stations.2.station_name}}: {{lyft_bike_share.stations.2.electric_bikes}}E
+TOTAL: {{lyft_bike_share.total_electric}}E
 ```
 
 ### With Color
 
 ```
 {center}BIKE SHARE
-{{lyft_bikeshare.stations.0.status_color}} {{lyft_bikeshare.stations.0.station_name}}
-E:{{lyft_bikeshare.stations.0.electric_bikes}} C:{{lyft_bikeshare.stations.0.classic_bikes}}
+{{lyft_bike_share.stations.0.status_color}} {{lyft_bike_share.stations.0.station_name}}
+E:{{lyft_bike_share.stations.0.electric_bikes}} C:{{lyft_bike_share.stations.0.classic_bikes}}
 ```
 
 ## Configuration

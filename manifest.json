@@ -1,5 +1,5 @@
 {
-  "id": "lyft_bikeshare",
+  "id": "lyft_bike_share",
   "name": "Lyft Bike Share",
   "version": "2.0.0",
   "description": "Display Lyft bike share availability with electric and classic bike counts. Works with Bay Wheels, CitiBike, Capital Bikeshare, Biketown, Divvy, and other Lyft-operated systems.",
@@ -233,11 +233,11 @@
     "device_type": "flagship",
     "template": [
       "BIKE SHARE",
-      "{{lyft_bikeshare.station_name}}",
-      "E-Bikes {{lyft_bikeshare.electric_bikes}}",
-      "Classic {{lyft_bikeshare.classic_bikes}}",
-      "Total {{lyft_bikeshare.num_bikes_available}}",
-      "Stations {{lyft_bikeshare.station_count}}"
+      "{{lyft_bike_share.station_name}}",
+      "E-Bikes {{lyft_bike_share.electric_bikes}}",
+      "Classic {{lyft_bike_share.classic_bikes}}",
+      "Total {{lyft_bike_share.num_bikes_available}}",
+      "Stations {{lyft_bike_share.station_count}}"
     ],
     "line_metadata": [
       {

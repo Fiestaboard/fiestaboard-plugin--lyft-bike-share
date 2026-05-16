@@ -36,7 +36,7 @@ class LyftBikeSharePlugin(PluginBase):
 
     @property
     def plugin_id(self) -> str:
-        return "lyft_bikeshare"
+        return "lyft_bike_share"
 
     def _gbfs_base_url(self) -> str:
         """Return the configured GBFS base URL."""

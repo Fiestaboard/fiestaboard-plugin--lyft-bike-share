@@ -123,13 +123,13 @@ Longitude: -74.0060
 **Example Template:**
 ```
 {center}BIKE SHARE
-{lyft_bikeshare.stations.0.station_name}
-E-Bikes: {lyft_bikeshare.stations.0.electric_bikes}
-Classic: {lyft_bikeshare.stations.0.classic_bikes}
+{lyft_bike_share.stations.0.station_name}
+E-Bikes: {lyft_bike_share.stations.0.electric_bikes}
+Classic: {lyft_bike_share.stations.0.classic_bikes}
 
-{lyft_bikeshare.stations.1.station_name}
-E-Bikes: {lyft_bikeshare.stations.1.electric_bikes}
-Classic: {lyft_bikeshare.stations.1.classic_bikes}
+{lyft_bike_share.stations.1.station_name}
+E-Bikes: {lyft_bike_share.stations.1.electric_bikes}
+Classic: {lyft_bike_share.stations.1.classic_bikes}
 ```
 
 4. **Save** and **Set as Active**
@@ -141,11 +141,11 @@ Classic: {lyft_bikeshare.stations.1.classic_bikes}
 Access individual stations using index (0-3):
 
 ```
-{lyft_bikeshare.stations.0.station_name}       # Station name (e.g., "19th St BART")
-{lyft_bikeshare.stations.0.electric_bikes}    # Number of electric bikes available
-{lyft_bikeshare.stations.0.classic_bikes}     # Number of classic bikes available
-{lyft_bikeshare.stations.0.num_bikes_available} # Total bikes available
-{lyft_bikeshare.stations.0.is_renting}        # "Yes" or "No"
+{lyft_bike_share.stations.0.station_name}       # Station name (e.g., "19th St BART")
+{lyft_bike_share.stations.0.electric_bikes}    # Number of electric bikes available
+{lyft_bike_share.stations.0.classic_bikes}     # Number of classic bikes available
+{lyft_bike_share.stations.0.num_bikes_available} # Total bikes available
+{lyft_bike_share.stations.0.is_renting}        # "Yes" or "No"
 ```
 
 ### Aggregate Variables
@@ -153,15 +153,15 @@ Access individual stations using index (0-3):
 Total across all configured stations:
 
 ```
-{lyft_bikeshare.total_electric}    # Total electric bikes across all stations
-{lyft_bikeshare.total_classic}     # Total classic bikes across all stations
-{lyft_bikeshare.total_bikes}       # Total bikes across all stations
+{lyft_bike_share.total_electric}    # Total electric bikes across all stations
+{lyft_bike_share.total_classic}     # Total classic bikes across all stations
+{lyft_bike_share.total_bikes}       # Total bikes across all stations
 ```
 
 ### Station Count
 
 ```
-{lyft_bikeshare.station_count}     # Number of configured stations
+{lyft_bike_share.station_count}     # Number of configured stations
 ```
 
 ## Example Templates
@@ -173,38 +173,38 @@ Total across all configured stations:
 ```
 {center}BIKE SHARE
 19th & Telegraph
-E-Bikes: {lyft_bikeshare.stations.0.electric_bikes}
-Classic: {lyft_bikeshare.stations.0.classic_bikes}
+E-Bikes: {lyft_bike_share.stations.0.electric_bikes}
+Classic: {lyft_bike_share.stations.0.classic_bikes}
 ```
 
 ### Multiple Stations Compact
 
 ```
 {center}BIKE SHARE
-HOME: {lyft_bikeshare.stations.0.electric_bikes}E {lyft_bikeshare.stations.0.classic_bikes}C
-WORK: {lyft_bikeshare.stations.1.electric_bikes}E {lyft_bikeshare.stations.1.classic_bikes}C
-GYM:  {lyft_bikeshare.stations.2.electric_bikes}E {lyft_bikeshare.stations.2.classic_bikes}C
+HOME: {lyft_bike_share.stations.0.electric_bikes}E {lyft_bike_share.stations.0.classic_bikes}C
+WORK: {lyft_bike_share.stations.1.electric_bikes}E {lyft_bike_share.stations.1.classic_bikes}C
+GYM:  {lyft_bike_share.stations.2.electric_bikes}E {lyft_bike_share.stations.2.classic_bikes}C
 ```
 
 ### Aggregate Summary
 
 ```
 {center}BIKE SHARE TOTAL
-{lyft_bikeshare.station_count} Stations Monitored
-E-Bikes: {lyft_bikeshare.total_electric}
-Classic: {lyft_bikeshare.total_classic}
-Bikes: {lyft_bikeshare.total_bikes}
+{lyft_bike_share.station_count} Stations Monitored
+E-Bikes: {lyft_bike_share.total_electric}
+Classic: {lyft_bike_share.total_classic}
+Bikes: {lyft_bike_share.total_bikes}
 ```
 
 ### With Station Names
 
 ```
 {center}BIKE AVAILABILITY
-{lyft_bikeshare.stations.0.station_name}
-E:{lyft_bikeshare.stations.0.electric_bikes} C:{lyft_bikeshare.stations.0.classic_bikes}
+{lyft_bike_share.stations.0.station_name}
+E:{lyft_bike_share.stations.0.electric_bikes} C:{lyft_bike_share.stations.0.classic_bikes}
 
-{lyft_bikeshare.stations.1.station_name}
-E:{lyft_bikeshare.stations.1.electric_bikes} C:{lyft_bikeshare.stations.1.classic_bikes}
+{lyft_bike_share.stations.1.station_name}
+E:{lyft_bike_share.stations.1.electric_bikes} C:{lyft_bike_share.stations.1.classic_bikes}
 ```
 
 ## Configuration Reference
@@ -227,7 +227,7 @@ LYFT_BIKESHARE_REFRESH_SECONDS=60  # Default: 60 (1 minute)
 ```json
 {
   "features": {
-    "lyft_bikeshare": {
+    "lyft_bike_share": {
       "enabled": true,
       "gbfs_base_url": "https://gbfs.citibikenyc.com/gbfs/en",
       "refresh_seconds": 60,
@@ -300,7 +300,7 @@ When configuring manually, use short names that fit on the display:
 **Problem:** Station names overflow on display
 
 **Solutions:**
-1. **Use truncate filter**: `{lyft_bikeshare.stations.0.station_name|truncate:22}`
+1. **Use truncate filter**: `{lyft_bike_share.stations.0.station_name|truncate:22}`
 2. **Use abbreviations**: "BART" instead of "BART Station"
 
 ## Data Source
@@ -318,7 +318,7 @@ All Lyft bike share systems use the **GBFS (General Bikeshare Feed Specification
 ```
 {center}MORNING COMMUTE
 Muni: {muni.stops.0.formatted}
-Bikes: {lyft_bikeshare.stations.0.electric_bikes}E
+Bikes: {lyft_bike_share.stations.0.electric_bikes}E
 Traffic: {traffic.routes.0.duration_minutes}m
 ```
 
@@ -326,9 +326,9 @@ Traffic: {traffic.routes.0.duration_minutes}m
 
 ```
 {center}WHICH STATION?
-Near: {lyft_bikeshare.stations.0.electric_bikes}E {lyft_bikeshare.stations.0.classic_bikes}C
-Alt:  {lyft_bikeshare.stations.1.electric_bikes}E {lyft_bikeshare.stations.1.classic_bikes}C
-Best: {lyft_bikeshare.stations.2.electric_bikes}E {lyft_bikeshare.stations.2.classic_bikes}C
+Near: {lyft_bike_share.stations.0.electric_bikes}E {lyft_bike_share.stations.0.classic_bikes}C
+Alt:  {lyft_bike_share.stations.1.electric_bikes}E {lyft_bike_share.stations.1.classic_bikes}C
+Best: {lyft_bike_share.stations.2.electric_bikes}E {lyft_bike_share.stations.2.classic_bikes}C
 ```
 
 ## API Reference
@@ -337,13 +337,13 @@ Best: {lyft_bikeshare.stations.2.electric_bikes}E {lyft_bikeshare.stations.2.cla
 
 ```bash
 # List all stations for configured system
-GET /lyft_bikeshare/stations
+GET /lyft_bike_share/stations
 
 # Find stations near location
-GET /lyft_bikeshare/stations/nearby?lat=40.7128&lng=-74.0060&radius=2.0
+GET /lyft_bike_share/stations/nearby?lat=40.7128&lng=-74.0060&radius=2.0
 
 # Search stations by address
-GET /lyft_bikeshare/stations/search?address=123+Market+St&radius=2.0
+GET /lyft_bike_share/stations/search?address=123+Market+St&radius=2.0
 ```
 
 ## Related Features
