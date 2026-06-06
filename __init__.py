@@ -141,10 +141,6 @@ class LyftBikeSharePlugin(PluginBase):
                 if station_id in station_info:
                     station_name = station_info[station_id].get("name", station_id)
 
-                # Truncate name for display
-                if len(station_name) > 10:
-                    station_name = station_name[:10]
-
                 stations_data.append({
                     "station_id": station_id,
                     "station_name": station_name,

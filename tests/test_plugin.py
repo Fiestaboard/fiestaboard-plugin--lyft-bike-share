@@ -845,7 +845,8 @@ class TestBayWheelsPluginClass:
              patch.object(plugin, '_get_station_information', return_value=station_info):
             result = plugin.fetch_data()
             assert result.available
-            assert len(result.data["station_name"]) <= 10
+            # Station names are returned in full; truncation belongs in templates.
+            assert result.data["station_name"] == "A Very Long Station Name Here"
 
     def test_fetch_data_not_renting(self, plugin):
         plugin._config = {"station_ids": ["station-1"]}
