@@ -244,9 +244,9 @@
     {
       "device_type": "note",
       "rows": [
-        "BIKE SHARE",
-        "E-BIKE {65} 5",
-        "TOTAL 8"
+        "{66}{66} BIKE SHARE",
+        "E-BIKES 5",
+        "CLASSIC 3"
       ]
     }
   ],
