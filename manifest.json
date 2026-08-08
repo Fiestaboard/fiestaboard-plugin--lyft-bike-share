@@ -228,6 +228,28 @@
       "primary": true
     }
   ],
+  "teaser": "5 E-BIKES READY",
+  "previews": [
+    {
+      "device_type": "flagship",
+      "rows": [
+        "{66}{66}{66}{66}{66}{66}{66}{66}{66}{66}{66}{66}{66}{66}{66}{66}{66}{66}{66}{66}{66}{66}",
+        "     BAY WHEELS",
+        "MARKET + 2ND   8 BIKES",
+        "POWELL STATION 9 BIKES",
+        "EMBARCADERO   20 BIKES",
+        "FERRY BLDG    11 BIKES"
+      ]
+    },
+    {
+      "device_type": "note",
+      "rows": [
+        "BIKE SHARE",
+        "E-BIKE {65} 5",
+        "TOTAL 8"
+      ]
+    }
+  ],
   "demo": {
     "flagship": {
       "name": "Lyft Bike Share Demo",
