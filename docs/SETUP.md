@@ -1,6 +1,6 @@
 # Lyft Bike Share Setup Guide
 
-The Lyft Bike Share plugin lets you track real-time bike availability at stations on any Lyft-operated bike share system. The visual station finder makes it easy to find and monitor stations near your locations.
+The Lyft Bike Share plugin lets you track real-time bike availability at stations on any Lyft-operated bike share system. A searchable station picker, fed live from your system's GBFS feed, makes it easy to find and monitor the stations you care about.
 
 ## Supported Systems
 
@@ -20,7 +20,7 @@ This plugin works with all Lyft-operated bike share systems:
 - Displays real-time bike availability (electric and classic bikes)
 - Tracks multiple stations simultaneously (up to 4)
 - Shows dock availability for bike returns
-- Provides visual station finder with map-based selection
+- Provides a searchable station picker fed live from the GBFS feed
 - No API key required (uses public GBFS feed)
 
 **Use Cases:**
@@ -33,7 +33,7 @@ This plugin works with all Lyft-operated bike share systems:
 
 - ✅ No API key required
 - ✅ A Lyft bike share system in your area (see supported systems above)
-- ✅ Web UI access for station finder
+- ✅ Web UI access for the station picker
 
 ## Quick Setup
 
@@ -74,45 +74,40 @@ LYFT_BIKESHARE_GBFS_BASE_URL=https://gbfs.biketownpdx.com/gbfs/en
 LYFT_BIKESHARE_GBFS_BASE_URL=https://gbfs.divvybikes.com/gbfs/en
 ```
 
-### 3. Add Stations Using Station Finder
+### 3. Pick Your Stations
 
-The web UI provides a visual station finder:
+**Stations** is a searchable picker, not a box you type GBFS IDs into. It reads
+your system's live `station_information.json`, so it always offers exactly the
+stations your feed publishes.
 
 1. Go to the **Lyft Bike Share** plugin on the **Integrations** page
-2. Click **Find Stations** button
-3. Use one of three methods to find stations:
+2. Make sure the **GBFS Feed URL** is set for your city — it decides which
+   catalog the picker offers
+3. Open **Stations** and start typing a station name
 
-**Method A: Search by Address**
-```
-Enter address: "123 Market St, San Francisco"
-→ Shows nearby stations within 2km
-```
+   ```
+   Type: "market"
+   → Market St at 10th St     San Francisco · SF-G30     27 docks
+     Market St at Beale St    San Francisco · SF-D22     19 docks
+   ```
 
-**Method B: Use Current Location**
-```
-Click "Use My Location"
-→ Browser requests location permission
-→ Shows stations near you
-```
+   Each option shows the station name, its region and station code, and how
+   many docks it has. Options are grouped by region, so it is obvious whether
+   "Broadway at 14th" is the one in Oakland or the one elsewhere.
 
-**Method C: Enter Coordinates**
-```
-Latitude: 40.7128
-Longitude: -74.0060
-→ Shows nearby stations
-```
-
-4. **Select stations** from the results (up to 4)
-   - Each station shows:
-     - Station name and address
-     - Distance from search location
-     - Current bike availability (electric/classic)
-     - Dock availability
-     - Capacity
-
-5. Click **Add Station** for each one you want to monitor
-
+4. **Select as many stations as you want.** Search runs upstream, so typing
+   narrows the whole catalog rather than just the visible page.
+5. **Drag them into order.** The first station is the one the single-station
+   variables (`station_name`, `electric_bikes`, …) report on; the rest are
+   available through `stations.1`, `stations.2`, and so on.
 6. **Save** your configuration
+
+Already know an ID? You can still type one in — `station_ids` is stored as a
+plain array of GBFS station ID strings exactly as it always was, so existing
+configurations keep working untouched.
+
+If the picker shows a hint instead of a list, either the GBFS Feed URL is blank
+or the feed could not be reached; see Troubleshooting below.
 
 ### 4. Create a Page to Display Bike Share Data
 
@@ -264,14 +259,17 @@ When configuring manually, use short names that fit on the display:
 
 ## Troubleshooting
 
-### No Stations Showing in Finder
+### Station Picker Shows a Hint Instead of a List
 
-**Problem:** Station finder returns no results
+**Problem:** The **Stations** field says it cannot load stations
 
 **Solutions:**
-1. **Verify GBFS Feed URL**: Confirm the URL matches your local system (see supported systems table above)
-2. **Increase search radius**: Try 3-5km instead of 2km
+1. **Set the GBFS Feed URL**: The picker cannot offer a catalog until it knows
+   which system to read
+2. **Verify GBFS Feed URL**: Confirm the URL matches your local system (see supported systems table above)
 3. **Verify feed directly**: Open your system's `station_information.json` URL in a browser
+4. **Search again**: Typing filters on station name only, so a street address or
+   station code will not match
 
 ### Station Shows Zero Bikes
 
@@ -279,7 +277,7 @@ When configuring manually, use short names that fit on the display:
 
 **Solutions:**
 1. **Check station status**: Station might be temporarily closed
-2. **Verify station ID**: Re-add station using station finder
+2. **Verify station ID**: Re-select the station in the **Stations** picker
 3. **Check GBFS status feed**: Station might be disabled for maintenance
 
 ### Data Not Updating
@@ -366,6 +364,6 @@ GET /lyft_bike_share/stations/search?address=123+Market+St&radius=2.0
 **Next Steps:**
 1. Enable Lyft Bike Share in Settings
 2. Set the GBFS Feed URL for your city's system
-3. Use station finder to add your favorite stations
+3. Use the **Stations** picker to add your favorite stations
 4. Create a page with bike availability
 5. Set as active page or combine with other transit data
