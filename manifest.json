@@ -1,7 +1,7 @@
 {
   "id": "lyft_bike_share",
   "name": "Lyft Bike Share",
-  "version": "2.0.3",
+  "version": "2.1.0",
   "description": "Display Lyft bike share availability with electric and classic bike counts. Works with Bay Wheels, CitiBike, Capital Bikeshare, Biketown, Divvy, and other Lyft-operated systems.",
   "author": "FiestaBoard Team",
   "repository": "https://github.com/Fiestaboard/fiestaboard-plugin--baywheels",
@@ -25,12 +25,25 @@
       },
       "station_ids": {
         "type": "array",
-        "title": "Station IDs",
-        "description": "Lyft bike share station IDs to monitor",
+        "title": "Stations",
+        "description": "Stations to monitor. Search by name; the first station is the one the single-station variables report on.",
         "items": {
           "type": "string"
         },
-        "ui:widget": "lyft-bikeshare-station-picker"
+        "ui:widget": "remote-options",
+        "ui:options": {
+          "options_id": "stations",
+          "depends_on": [
+            "gbfs_base_url"
+          ],
+          "multiple": true,
+          "cache_seconds": 3600,
+          "searchable": true,
+          "server_search": true,
+          "reorderable": true,
+          "allow_custom": true,
+          "placeholder": "Search stations by name"
+        }
       },
       "refresh_seconds": {
         "type": "integer",
@@ -219,7 +232,7 @@
       ]
     }
   },
-  "fiestaboard_version": ">=2.10.0",
+  "fiestaboard_version": ">=8.24.2",
   "screenshots": [
     {
       "src": "docs/board-display.png",

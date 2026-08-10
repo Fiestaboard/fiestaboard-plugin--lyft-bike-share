@@ -108,9 +108,26 @@ E:{{lyft_bike_share.stations.0.electric_bikes}} C:{{lyft_bike_share.stations.0.c
 | station_ids | array | - | Station IDs to monitor |
 | refresh_seconds | integer | 60 | Update interval |
 
-## Finding Station IDs
+## Choosing Stations
 
-Use the station search feature in the UI to find stations near you by address or coordinates.
+`station_ids` is a searchable picker in the settings form, not a field you type
+GBFS IDs into. Set the **GBFS Feed URL** first, then open **Stations** and start
+typing a station name — the list comes live from your system's
+`station_information.json`, grouped by region, with the station code and dock
+capacity shown next to each name.
+
+- Search runs against the whole catalog upstream, so typing narrows all 600+
+  Bay Wheels stations rather than just the first page.
+- Pick as many stations as you like and drag them into order. Order matters:
+  the first station is the one `{{lyft_bike_share.station_name}}` and the other
+  single-station variables report on.
+- Changing the GBFS Feed URL rebuilds the list for the new system.
+- A station ID you already know can still be typed in by hand, so
+  configurations written before the picker existed keep working unchanged —
+  `station_ids` is still a plain array of GBFS station ID strings.
+
+If the picker shows a hint instead of a list, the feed URL is blank or the GBFS
+feed could not be reached; check the URL and try again.
 
 ## Color Indicators
 

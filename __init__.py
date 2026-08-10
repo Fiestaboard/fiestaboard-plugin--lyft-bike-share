@@ -10,7 +10,14 @@ import logging
 import requests
 import time
 
-from src.plugins.base import PluginBase, PluginResult
+from src.plugins.base import (
+    Option,
+    OptionsRequest,
+    OptionsResult,
+    OptionsUnavailable,
+    PluginBase,
+    PluginResult,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -20,6 +27,13 @@ DEFAULT_GBFS_BASE_URL = "https://gbfs.baywheels.com/gbfs/en"
 _station_info_cache: Dict[str, Dict] = {}
 _station_info_cache_time: Dict[str, float] = {}
 STATION_INFO_CACHE_TTL = 24 * 60 * 60
+
+# Cache for region names (keyed by base URL). Module level on purpose: the
+# options sandbox is a throwaway instance, so per-instance state never
+# survives from one picker request to the next.
+_region_name_cache: Dict[str, Dict[str, str]] = {}
+_region_name_cache_time: Dict[str, float] = {}
+REGION_CACHE_TTL = 24 * 60 * 60
 
 
 class LyftBikeSharePlugin(PluginBase):
@@ -40,7 +54,7 @@ class LyftBikeSharePlugin(PluginBase):
 
     def _gbfs_base_url(self) -> str:
         """Return the configured GBFS base URL."""
-        return self.config.get("gbfs_base_url", DEFAULT_GBFS_BASE_URL).rstrip("/")
+        return self.config.get("gbfs_base_url", DEFAULT_GBFS_BASE_URL).strip().rstrip("/")
 
     def validate_config(self, config: Dict[str, Any]) -> List[str]:
         """Validate Lyft Bike Share configuration."""
@@ -80,6 +94,11 @@ class LyftBikeSharePlugin(PluginBase):
                         "name": station.get("name", station_id),
                         "lat": station.get("lat"),
                         "lon": station.get("lon"),
+                        # Retained for the station picker (see get_options).
+                        "short_name": station.get("short_name"),
+                        "address": station.get("address"),
+                        "region_id": station.get("region_id"),
+                        "capacity": station.get("capacity"),
                     }
 
             _station_info_cache[base_url] = station_map
@@ -89,6 +108,120 @@ class LyftBikeSharePlugin(PluginBase):
         except Exception as e:
             logger.error(f"Failed to fetch station information: {e}")
             return _station_info_cache.get(base_url)
+
+    def get_options(self, request: OptionsRequest) -> OptionsResult:
+        """Browse the configured GBFS system's station catalog.
+
+        This is not :meth:`fetch_data`: that reports on the stations the user
+        already chose, while this offers every station in the system so they
+        can choose one. It runs on a throwaway instance from the settings
+        dialog, possibly before the plugin has ever been configured.
+        """
+        if request.options_id != "stations":
+            raise NotImplementedError(request.options_id)
+
+        base_url = self._gbfs_base_url()
+        if not base_url:
+            raise OptionsUnavailable("Set the GBFS feed URL for your bike share system first")
+
+        stations = self._get_station_information() or {}
+        if not stations:
+            raise OptionsUnavailable(f"Could not read the station list from {base_url}")
+
+        regions = self._get_region_names()
+
+        query = (request.query or "").strip().lower()
+        matches = [
+            (station_id, info)
+            for station_id, info in stations.items()
+            if not query or query in (info.get("name") or station_id).lower()
+        ]
+
+        start = self._cursor_offset(request.cursor)
+        limit = request.limit if request.limit and request.limit > 0 else len(matches)
+        page = matches[start : start + limit]
+        end = start + len(page)
+
+        options = [
+            Option(
+                value=station_id,
+                label=info.get("name") or station_id,
+                description=self._station_description(info, regions),
+                group=regions.get(str(info.get("region_id"))),
+                preview=self._capacity_preview(info.get("capacity")),
+            )
+            for station_id, info in page
+        ]
+        has_more = end < len(matches)
+        return OptionsResult(
+            options=options,
+            has_more=has_more,
+            cursor=str(end) if has_more else None,
+            total=len(matches),
+        )
+
+    @staticmethod
+    def _cursor_offset(cursor: Optional[str]) -> int:
+        """Decode a continuation cursor into a catalog offset.
+
+        The cursor is ours to define, but it round-trips through the browser,
+        so anything unparseable means "start over" rather than an exception.
+        """
+        try:
+            return max(0, int(cursor))
+        except (TypeError, ValueError):
+            return 0
+
+    @staticmethod
+    def _capacity_preview(capacity: Any) -> Optional[str]:
+        """Render a station's dock capacity for the picker's preview slot."""
+        if isinstance(capacity, bool) or not isinstance(capacity, int):
+            return None
+        return f"{capacity} docks"
+
+    @staticmethod
+    def _station_description(info: Dict[str, Any], regions: Dict[str, str]) -> Optional[str]:
+        """Describe a station well enough to tell it from a same-named one.
+
+        Large Lyft systems span several cities, so the region does most of the
+        disambiguating; the station code is what is printed on the kiosk.
+        """
+        parts = [
+            regions.get(str(info.get("region_id"))),
+            info.get("address") or info.get("short_name"),
+        ]
+        return " · ".join(part for part in parts if part) or None
+
+    def _get_region_names(self) -> Dict[str, str]:
+        """Return ``{region_id: region_name}`` for the configured GBFS system.
+
+        Regions are optional in GBFS, so an unreachable or absent feed simply
+        means stations go undescribed — never that the picker fails.
+        """
+        global _region_name_cache, _region_name_cache_time
+
+        base_url = self._gbfs_base_url()
+        current_time = time.time()
+
+        cached = _region_name_cache.get(base_url)
+        if cached is not None and (current_time - _region_name_cache_time.get(base_url, 0)) < REGION_CACHE_TTL:
+            return cached
+
+        try:
+            response = requests.get(f"{base_url}/system_regions.json", timeout=10)
+            response.raise_for_status()
+            regions = {
+                str(region["region_id"]): region["name"]
+                for region in response.json().get("data", {}).get("regions", [])
+                if region.get("region_id") is not None and region.get("name")
+            }
+        except Exception as e:
+            logger.warning(f"Could not fetch GBFS system regions: {e}")
+            return _region_name_cache.get(base_url, {})
+
+        _region_name_cache[base_url] = regions
+        _region_name_cache_time[base_url] = current_time
+        return regions
 
     def _get_status_color(self, electric_bikes: int) -> str:
         """Get color based on electric bike count."""
