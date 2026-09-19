@@ -702,35 +702,73 @@ class TestBayWheelsSource:
                 assert station["distance_km"] >= 0
 
 
-class TestBayWheelsConfig:
-    """Test Bay Wheels configuration integration."""
-    
-    def test_get_baywheels_source_disabled(self):
-        """Test that source is None when disabled."""
-        from src.utils.baywheels import get_baywheels_source
-        
-        with patch('src.utils.baywheels.Config.BAYWHEELS_ENABLED', False):
-            source = get_baywheels_source()
-            assert source is None
-    
-    def test_get_baywheels_source_no_station_id(self):
-        """Test that source is None when station ID not configured."""
-        from src.utils.baywheels import get_baywheels_source
-        
-        with patch('src.utils.baywheels.Config.BAYWHEELS_ENABLED', True), \
-             patch('src.utils.baywheels.Config.BAYWHEELS_STATION_IDS', []):
-            source = get_baywheels_source()
-            assert source is None
-    
-    def test_get_baywheels_source_configured(self):
-        """Test that source is created when properly configured."""
-        from src.utils.baywheels import get_baywheels_source
-        
-        with patch('src.utils.baywheels.Config.BAYWHEELS_ENABLED', True), \
-             patch('src.utils.baywheels.Config.BAYWHEELS_STATION_IDS', ["test-station"]):
-            source = get_baywheels_source()
-            assert source is not None
-            assert source.station_ids == ["test-station"]
+class TestConfiguredStations:
+    """How the plugin itself handles the station list it is configured with.
+
+    These replace tests of core's ``get_baywheels_source()`` factory, which
+    read ``Config.BAYWHEELS_ENABLED`` / ``Config.BAYWHEELS_STATION_IDS`` and no
+    longer exists. The plugin has no enable flag of its own -- enabling is the
+    platform registry's job (``plugin.enabled``) -- so what is left to test
+    here is the ``station_ids`` config: nothing is fetched without it, and only
+    the configured stations, in configured order, come back with it.
+    """
+
+    @pytest.fixture
+    def plugin(self):
+        from plugins.lyft_bike_share import LyftBikeSharePlugin
+        manifest = {"id": "lyft_bike_share", "name": "Lyft Bike Share", "version": "2.0.0"}
+        return LyftBikeSharePlugin(manifest)
+
+    @staticmethod
+    def _status_feed(*station_ids):
+        """A station_status.json response listing ``station_ids`` in that order."""
+        resp = Mock()
+        resp.raise_for_status.return_value = None
+        resp.json.return_value = {
+            "data": {
+                "stations": [
+                    {
+                        "station_id": station_id,
+                        "num_bikes_available": 4,
+                        "num_ebikes_available": 1,
+                        "is_renting": 1,
+                    }
+                    for station_id in station_ids
+                ]
+            }
+        }
+        return resp
+
+    def test_no_station_ids_means_no_request_to_the_feed(self, plugin):
+        """Unconfigured, the plugin reports the gap instead of hitting GBFS."""
+        plugin.config = {}
+        with patch('plugins.lyft_bike_share.requests.get') as mock_get:
+            result = plugin.fetch_data()
+        assert not result.available
+        assert result.error == "No station IDs configured"
+        mock_get.assert_not_called()
+
+    def test_only_the_configured_stations_are_reported(self, plugin):
+        """The feed lists every station in the system; the result lists ours."""
+        plugin.config = {"station_ids": ["station-2"]}
+        feed = self._status_feed("station-1", "station-2", "station-3")
+        with patch('plugins.lyft_bike_share.requests.get', return_value=feed), \
+             patch.object(plugin, '_get_station_information', return_value={}):
+            result = plugin.fetch_data()
+        assert result.available
+        assert [s["station_id"] for s in result.data["stations"]] == ["station-2"]
+        assert result.data["station_count"] == 1
+
+    def test_configured_order_decides_the_primary_station(self, plugin):
+        """The first configured station is primary, whatever order the feed uses."""
+        plugin.config = {"station_ids": ["station-b", "station-a"]}
+        feed = self._status_feed("station-a", "station-b")
+        with patch('plugins.lyft_bike_share.requests.get', return_value=feed), \
+             patch.object(plugin, '_get_station_information', return_value={}):
+            result = plugin.fetch_data()
+        assert result.available
+        assert [s["station_id"] for s in result.data["stations"]] == ["station-b", "station-a"]
+        assert result.data["station_name"] == "station-b"
 
 
 class TestBayWheelsPluginClass:
