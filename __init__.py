@@ -10,6 +10,7 @@ import logging
 import requests
 import time
 
+from src.devices import BoardContext
 from src.plugins.base import (
     Option,
     OptionsRequest,
@@ -18,6 +19,7 @@ from src.plugins.base import (
     PluginBase,
     PluginResult,
 )
+from src.text_to_board import count_tiles, take_tiles
 
 logger = logging.getLogger(__name__)
 
@@ -330,7 +332,16 @@ class LyftBikeSharePlugin(PluginBase):
             return PluginResult(available=False, error=str(e))
 
     def get_formatted_display(self) -> Optional[List[str]]:
-        """Return default formatted display."""
+        """Return a whole-board rendering of station availability.
+
+        Nothing in core calls this hook today, but it is the documented
+        contract, so it must adapt to whatever board is bound rather than
+        assume a Flagship (22x6). Every dimension comes from ``self.board``:
+        a Note gets abbreviated station names, a wide panel gets full names,
+        and a tall one lists more stations instead of repeating the same
+        few. ``self.board`` is ``None`` outside a board-scoped render, which
+        is treated as a Flagship.
+        """
         if not self._cache:
             result = self.fetch_data()
             if not result.available:
@@ -340,17 +351,51 @@ class LyftBikeSharePlugin(PluginBase):
         if not data:
             return None
 
+        board = self.board or BoardContext.from_device_type("flagship")
+        rows, cols = board.rows, board.cols
+
         stations = data.get("stations", [])
-        lines = ["BIKE SHARE".center(22), ""]
+        lines = [self._centered("BIKE SHARE", cols)]
 
-        for station in stations[:4]:
-            line = f"{station['station_name']}: {station['electric_bikes']}E {station['classic_bikes']}C"
-            lines.append(line[:22])
-
-        while len(lines) < 6:
+        # A spacer row only when there is height to spare -- a Note (3 rows)
+        # needs every row for station content instead.
+        if rows >= 5:
             lines.append("")
 
-        return lines[:6]
+        remaining = max(rows - len(lines), 0)
+        for station in stations[:remaining]:
+            lines.append(self._format_station_line(station, cols))
+
+        while len(lines) < rows:
+            lines.append("")
+
+        return lines[:rows]
+
+    @staticmethod
+    def _centered(text: str, cols: int) -> str:
+        """Center *text* within a *cols*-tile-wide row, measured in tiles."""
+        tiles = count_tiles(text)
+        if tiles >= cols:
+            fitted, _ = take_tiles(text, cols)
+            return fitted
+        pad = cols - tiles
+        left = pad // 2
+        return f"{' ' * left}{text}{' ' * (pad - left)}"
+
+    @staticmethod
+    def _format_station_line(station: Dict[str, Any], cols: int) -> str:
+        """Render one station's availability, reflowing to *cols* tiles.
+
+        Wide boards show the station's full name; narrow ones abbreviate the
+        name deliberately -- the bike counts are what a rider actually needs,
+        so they are never the part that gets cut.
+        """
+        suffix = f": {station['electric_bikes']}E {station['classic_bikes']}C"
+        name_budget = max(cols - count_tiles(suffix), 0)
+        name, _ = take_tiles(station["station_name"], name_budget)
+        line = f"{name}{suffix}"
+        fitted, _ = take_tiles(line, cols)
+        return fitted
 
 
 # Export the plugin class
