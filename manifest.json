@@ -1,7 +1,7 @@
 {
   "id": "lyft_bike_share",
   "name": "Lyft Bike Share",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "Display Lyft bike share availability with electric and classic bike counts. Works with Bay Wheels, CitiBike, Capital Bikeshare, Biketown, Divvy, and other Lyft-operated systems.",
   "author": "FiestaBoard Team",
   "repository": "https://github.com/Fiestaboard/fiestaboard-plugin--baywheels",
@@ -204,7 +204,6 @@
     }
   },
   "max_lengths": {
-    "stations.*.station_name": 10,
     "stations.*.electric_bikes": 2,
     "stations.*.classic_bikes": 2,
     "stations.*.status_color": 4
@@ -260,6 +259,19 @@
         "{66}{66} BIKE SHARE",
         "E-BIKES 5",
         "CLASSIC 3"
+      ]
+    },
+    {
+      "device_type": "note_array",
+      "notes_wide": 2,
+      "notes_tall": 2,
+      "rows": [
+        "         BIKE SHARE",
+        "",
+        "MARKET ST AT 10TH ST: 5E 2C",
+        "EMBARCADERO AT FOLSOM: 8E 1C",
+        "POWELL ST BART STATION: 3E 4C",
+        "FERRY BUILDING: 6E 0C"
       ]
     }
   ],

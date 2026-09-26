@@ -5,6 +5,7 @@ import json
 import time
 from pathlib import Path
 from unittest.mock import Mock, patch
+from src.devices import BoardContext
 from src.utils.baywheels import BayWheelsSource, STATION_STATUS_URL
 
 
@@ -983,6 +984,84 @@ class TestBayWheelsPluginClass:
         plugin._config = {}
         lines = plugin.get_formatted_display()
         assert lines is None
+
+    def test_get_formatted_display_note_abbreviates_and_skips_spacer(self, plugin):
+        """A Note (15x3) uses every row for stations and abbreviates names.
+
+        No spacer row (unlike the Flagship): with only 3 rows there is no
+        height to spare. The long name is cut short, but the bike counts --
+        the part a rider actually needs -- are never the part that gets cut.
+        """
+        plugin._cache = {
+            "stations": [
+                {
+                    "station_name": "Embarcadero at Folsom Street Plaza",
+                    "electric_bikes": 8,
+                    "classic_bikes": 1,
+                },
+                {
+                    "station_name": "Ferry Building",
+                    "electric_bikes": 6,
+                    "classic_bikes": 0,
+                },
+            ]
+        }
+        with plugin._bound_board(BoardContext(device_type="note", rows=3, cols=15)):
+            lines = plugin.get_formatted_display()
+
+        assert lines is not None
+        assert len(lines) == 3
+        assert all(len(line) <= 15 for line in lines)
+        # No blank spacer row -- both remaining rows are station content.
+        assert lines[1].strip() and lines[2].strip()
+        # The name is cut short to fit; the bike counts never are.
+        assert lines[1] == "Embarcad: 8E 1C"
+        assert lines[2] == "Ferry Bu: 6E 0C"
+
+    def test_get_formatted_display_wide_board_shows_full_name_and_more_rows(self, plugin):
+        """A wide, tall board (note_array 2x2 = 30x6) keeps full names and
+        lists more stations than a Flagship would, rather than repeating the
+        same fixed few.
+        """
+        plugin._cache = {
+            "stations": [
+                {"station_name": "Ferry Building", "electric_bikes": 8, "classic_bikes": 1}
+                for _ in range(6)
+            ]
+        }
+        with plugin._bound_board(BoardContext(device_type="note_array", rows=6, cols=30)):
+            lines = plugin.get_formatted_display()
+
+        assert lines is not None
+        assert len(lines) == 6
+        assert all(len(line) <= 30 for line in lines)
+        # Full name preserved -- 30 cols is wide enough that it need not be
+        # abbreviated the way the longer name was on the Note above.
+        assert "Ferry Building: 8E 1C" in lines
+        # A spacer row (rows >= 5) plus 4 station rows -- more than the
+        # Flagship's fixed 4, because there is more height to use.
+        assert lines[1] == ""
+        assert sum(1 for line in lines if line.strip()) == 5
+
+    def test_get_formatted_display_unbound_board_defaults_to_flagship(self, plugin):
+        """Outside a board-scoped render, ``self.board`` is None -- treat as Flagship."""
+        plugin._cache = {
+            "stations": [
+                {"station_name": "Station 1", "electric_bikes": 5, "classic_bikes": 3}
+            ]
+        }
+        assert plugin.board is None
+        lines = plugin.get_formatted_display()
+        assert lines is not None
+        assert len(lines) == 6
+        assert all(len(line) <= 22 for line in lines)
+
+    def test_centered_truncates_text_wider_than_board(self, plugin):
+        """``_centered`` clips rather than overflows when text exceeds cols."""
+        assert plugin._centered("BIKE SHARE", 5) == "BIKE "
+
+    def test_centered_pads_evenly(self, plugin):
+        assert plugin._centered("HI", 6) == "  HI  "
 
 
 MANIFEST_PATH = Path(__file__).resolve().parent.parent / "manifest.json"
